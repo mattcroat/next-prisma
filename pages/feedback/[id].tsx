@@ -1,9 +1,11 @@
 import React from 'react'
 import Link from 'next/link'
 
-const SingleFeedback = ({ feedbackItem }) => {
+import { prisma } from 'lib/prisma'
+
+export default function SingleFeedback({ feedbackItem }) {
   return (
-    <div className="prose prose-blue text-white mx-auto h-screen">
+    <div className="h-screen mx-auto prose text-white prose-blue">
       <Link href="/feedback">
         <a>Go back</a>
       </Link>
@@ -15,20 +17,24 @@ const SingleFeedback = ({ feedbackItem }) => {
   )
 }
 
-export default SingleFeedback
+export async function getServerSideProps(context) {
+  const { id } = context.params
 
-export const getServerSideProps = async (context) => {
-  const id = context.params.id
+  const feedbackItem = await prisma.feedback.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      name: true,
+      email: true,
+      message: true,
+      feedbackType: true,
+    },
+  })
 
   return {
     props: {
-      feedbackItem: {
-        id: 1,
-        message: "Hey there I'm a demo message",
-        feedbackType: 'ISSUE',
-        email: 'mahmoud@prisma.io',
-        name: 'Mahmoud',
-      },
+      feedbackItem,
     },
   }
 }
